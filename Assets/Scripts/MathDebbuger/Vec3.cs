@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.UIElements;
 namespace CustomMath
 {
     public struct Vec3 : IEquatable<Vec3>
@@ -11,9 +12,9 @@ namespace CustomMath
         public float y;
         public float z;
 
-        public float sqrMagnitude { get { throw new NotImplementedException(); } }
-        public Vector3 normalized { get { throw new NotImplementedException(); } }
-        public float magnitude { get { throw new NotImplementedException(); } }
+        public float sqrMagnitude { get { return SqrMagnitude(this); } }
+        public Vec3 normalized { get { return new Vec3(this.x / magnitude, this.y / magnitude, this.z / magnitude); } }
+        public float magnitude { get { return Magnitude(this); } }
         #endregion
 
         #region constants
@@ -91,25 +92,25 @@ namespace CustomMath
 
         public static Vec3 operator -(Vec3 leftV3, Vec3 rightV3)
         {
-            throw new NotImplementedException();
+            return new Vec3(leftV3.x - rightV3.x, leftV3.y - rightV3.y, leftV3.z - rightV3.z);
         }
 
         public static Vec3 operator -(Vec3 v3)
         {
-            throw new NotImplementedException();
+            return new Vec3(-v3.x, -v3.y, -v3.z);
         }
 
         public static Vec3 operator *(Vec3 v3, float scalar)
         {
-            throw new NotImplementedException();
+            return new Vec3(v3.x * scalar, v3.y * scalar, v3.z * scalar);
         }
         public static Vec3 operator *(float scalar, Vec3 v3)
         {
-            throw new NotImplementedException();
+            return new Vec3(v3.x * scalar, v3.y * scalar, v3.z * scalar);
         }
         public static Vec3 operator /(Vec3 v3, float scalar)
         {
-            throw new NotImplementedException();
+            return new Vec3(v3.x / scalar, v3.y / scalar, v3.z / scalar);
         }
 
         public static implicit operator Vector3(Vec3 v3)
@@ -119,7 +120,7 @@ namespace CustomMath
 
         public static implicit operator Vector2(Vec3 v2)
         {
-            throw new NotImplementedException();
+            return new Vector3(v2.x, v2.y);
         }
         #endregion
 
@@ -130,67 +131,82 @@ namespace CustomMath
         }
         public static float Angle(Vec3 from, Vec3 to)
         {
-            throw new NotImplementedException();
+            return System.MathF.Acos(Dot(from, to));
         }
         public static Vec3 ClampMagnitude(Vec3 vector, float maxLength)
         {
-            throw new NotImplementedException();
+            return ((vector.magnitude <= maxLength) ? vector : (vector.normalized * maxLength));
         }
         public static float Magnitude(Vec3 vector)
         {
-            throw new NotImplementedException();
+            return System.MathF.Sqrt((vector.x * vector.x) + (vector.y * vector.y) + (vector.z * vector.z));
         }
         public static Vec3 Cross(Vec3 a, Vec3 b)
         {
-            throw new NotImplementedException();
+            return new Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.z);
         }
         public static float Distance(Vec3 a, Vec3 b)
         {
-            throw new NotImplementedException();
+            return Magnitude(a - b);
         }
         public static float Dot(Vec3 a, Vec3 b)
         {
-            throw new NotImplementedException();
+            return (a.x * b.x + a.y * b.y + a.z * b.z);
         }
         public static Vec3 Lerp(Vec3 a, Vec3 b, float t)
         {
-            throw new NotImplementedException();
+            System.Math.Clamp(t, 0.0f, 1.0f);
+
+            //return new Vec3(a * (1.0f - t) + b * t); //mi implementacion
+            return new Vec3(a + (b - a) * t);
         }
         public static Vec3 LerpUnclamped(Vec3 a, Vec3 b, float t)
         {
-            throw new NotImplementedException();
+            //return new Vec3(a * (1.0f - t) + b * t); //mi implementacion
+            return new Vec3(a + (b - a) * t);
         }
         public static Vec3 Max(Vec3 a, Vec3 b)
         {
-            throw new NotImplementedException();
+            return a.magnitude > b.magnitude ? a : b;
         }
         public static Vec3 Min(Vec3 a, Vec3 b)
         {
-            throw new NotImplementedException();
+            return a.magnitude < b.magnitude ? a : b;
         }
         public static float SqrMagnitude(Vec3 vector)
         {
-            throw new NotImplementedException();
+            return ((vector.x * vector.x) + (vector.y * vector.y) + (vector.z * vector.z));
         }
-        public static Vec3 Project(Vec3 vector, Vec3 onNormal) 
+        public static Vec3 Project(Vec3 vector, Vec3 onNormal)
         {
-            throw new NotImplementedException();
+            Vec3 normalized = onNormal.normalized;
+            float mag = Dot(vector, normalized); // magnitud de la proyeccion
+            return (normalized * mag);
         }
-        public static Vec3 Reflect(Vec3 inDirection, Vec3 inNormal) 
+        public static Vec3 Reflect(Vec3 inDirection, Vec3 inNormal)
         {
-            throw new NotImplementedException();
+            //return inDirection - 2 * inNormal.normalized * Dot(inDirection,inNormal.normalized); //resultado de Unity
+
+            return (Project(-inDirection, inNormal.normalized) * 2) + inDirection;
         }
         public void Set(float newX, float newY, float newZ)
         {
-            throw new NotImplementedException();
+            this.x = newX;
+            this.y = newY;
+            this.z = newZ;
+            return;
         }
         public void Scale(Vec3 scale)
         {
-            throw new NotImplementedException();
+            this.x *= scale.x;
+            this.y *= scale.y;
+            this.z *= scale.z;
         }
         public void Normalize()
         {
-            throw new NotImplementedException();
+            this.x /= magnitude;
+            this.y /= magnitude;
+            this.z /= magnitude;
         }
         #endregion
 
