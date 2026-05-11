@@ -4,8 +4,10 @@ using UnityEngine;
 using System;
 using UnityEngine.UIElements;
 
+
 namespace CustomMath
 {
+    [System.Serializable]
     public struct MyPlane : IEquatable<MyPlane> /*, IFormattable*/
     {
 
@@ -13,7 +15,7 @@ namespace CustomMath
         public Vec3 normal;
         public float distance;
 
-        public readonly MyPlane flipped { get { return new MyPlane(-normal, -distance); } }
+        public readonly MyPlane flipped { get { return new MyPlane(normal, -distance); } }
 
         #endregion
 
@@ -79,9 +81,9 @@ namespace CustomMath
         {
 
         }
-        public void GetSide(Vec3 point)
+        public bool GetSide(Vec3 point)
         {
-
+            return true;
         }
         public void SameSide(Vec3 inPt0, Vec3 inPt1)
         {
