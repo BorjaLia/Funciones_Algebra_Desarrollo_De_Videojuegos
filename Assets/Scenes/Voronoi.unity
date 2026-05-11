@@ -350,6 +350,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 217a4b3ff40decf4cbe9c3e61fd0a1be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentVisualizer: 0
   cellParent: {fileID: 1042676621}
   seedObject: {fileID: 8645601812555323211, guid: 7849f863be517254d8553e84d70e4834, type: 3}
   planeParent: {fileID: 770641366}
@@ -396,6 +397,7 @@ MonoBehaviour:
   - x: 13.348196
     y: 30.390152
     z: -38.787987
+  cellColors: []
 --- !u!4 &1313650529
 Transform:
   m_ObjectHideFlags: 0

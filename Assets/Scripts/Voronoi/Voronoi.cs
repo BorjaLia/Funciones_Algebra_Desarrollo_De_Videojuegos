@@ -96,7 +96,6 @@ public class Voronoi : MonoBehaviour
         //Create the 6 bounding planes
         CreateBoundingBox();
 
-
         //Add the bounding planes to each of the cells
         for (int i = 0; i < seeds.Count; i++)
         {

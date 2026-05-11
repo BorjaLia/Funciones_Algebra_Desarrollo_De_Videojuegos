@@ -42,7 +42,7 @@ public class PlaneVisualizer
         {
             VisualizeCell(cells[i], i);
 
-            for (int j = 0; j < cells[i].planes.Count; j++)
+            for (int j = 6; j < cells[i].planes.Count; j++)
             {
                 AddVisualPlane(cells[i].planes[j], i);
             }
