@@ -75,6 +75,7 @@ namespace CustomMath
        public void Flip()
         {
             this.normal = -this.normal;
+            this.distance = -this.distance;
         }
 
         public void GetDistanceToPoint(Vec3 point)
@@ -119,7 +120,8 @@ namespace CustomMath
         }
         public override int GetHashCode()
         {
-            return normal.GetHashCode() ^ distance.GetHashCode();
+            return HashCode.Combine(normal.GetHashCode(), distance.GetHashCode());
+            //return normal.GetHashCode() ^ distance.GetHashCode();
         }
         public override string ToString()
         {

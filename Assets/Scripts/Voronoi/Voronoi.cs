@@ -1,41 +1,7 @@
 using CustomMath;
 using System.Collections.Generic;
 using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
-
-
-class VoronoiCell
-{
-    public Vec3 seed;
-    public List<MyPlane> planes;
-
-    public VoronoiCell(Vec3 seed) { this.seed = seed; this.planes = new List<MyPlane>(); }
-    public void AddPlane(MyPlane plane) { planes.Add(plane); }
-}
-
-class VisualVoronoiCell
-{
-    public Transform parent;
-
-    public Color color = Random.ColorHSV();
-
-    GameObject seed;
-    List<GameObject> planes;
-
-    public void SetSeed(GameObject seed) { this.seed = seed; }
-    public void SetPlanes(List<GameObject> planes) { this.planes = planes; }
-    public void AddPlane(GameObject plane) { this.planes.Add(plane); }
-
-    public VisualVoronoiCell(Transform parent) { this.parent = parent; this.planes = new List<GameObject>(); this.color = Random.ColorHSV(); }
-    public VisualVoronoiCell(Transform parent, GameObject seed, List<GameObject> planes) { this.parent = parent; this.seed = seed; this.planes = planes; this.color = Random.ColorHSV(); }
-}
-
-class VoronoiMesh
-{
-    public List<Vec3> vertices;
-    public List<int> triangles;
-}
 
 [System.Serializable]
 public class Target
@@ -47,12 +13,24 @@ public class Target
     public int currentSpace;
 
     public Vec3 lastPos;
+
+    public void SetColor(Color color)
+    {
+        if(obj.GetComponent<MeshRenderer>())
+        {
+            obj.GetComponent<MeshRenderer>().material.color = color;
+        }
+        else
+        {
+            Debug.Log("No MeshRenderer found!");
+        }
+    }
 }
 
 //[ExecuteInEditMode]
 public class Voronoi : MonoBehaviour
 {
-    public enum Visualizer { Planes,EzySlice }
+    public enum Visualizer { Planes, EzySlice }
 
     [Header("Visuals")]
 
@@ -84,50 +62,40 @@ public class Voronoi : MonoBehaviour
     [SerializeField] public bool randomize = true;
     [SerializeField] public int seedAmount = 10;
     [SerializeField] public Vec3 maxSize = new Vec3(100, 100, 100);
-    
+
 
     [Header("Seeds")]
 
     [SerializeField] public List<Vec3> seeds = new List<Vec3>();
 
+    public List<Color> cellColors = new List<Color>();
 
     private List<Target> targets = new List<Target>();
-
     private MyPlane[] boundingPlanes = new MyPlane[6];
-
     private List<VoronoiCell> cells = new List<VoronoiCell>();
-    private List<VisualVoronoiCell> visualCells = new List<VisualVoronoiCell>();
+
+    private PlaneVisualizer planeVisualizer;
+    private MeshVisualizer meshVisualizer;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // Unity's plane is 10x10 units by default
-        planeObject.transform.localScale = (maxSize / 10);
-
         Cleanup();
+
+        planeVisualizer = new PlaneVisualizer(this);
+        meshVisualizer = new MeshVisualizer(this);
+
+        //Get the targets and load them into the target specific list
+        LoadTargets();
 
         if (randomize)
         {
-            seeds.Clear();
-            for (int i = 0; i < seedAmount; i++)
-            {
-                seeds.Add(new Vec3(Random.Range(-maxSize.x / 2, maxSize.x / 2), Random.Range(-maxSize.y / 2, maxSize.y / 2), Random.Range(-maxSize.z / 2, maxSize.z / 2)));
-            }
+            RandomizeSeeds();
         }
 
         //Create the 6 bounding planes
         CreateBoundingBox();
 
-        // Visually show the boundong box
-        for (int i = 0; i < 6; i++)
-        {
-            string name = "Bounding plane" + i.ToString();
-
-            CreateVisualPlane(boundingPlanes[i], planeParent, boundsColor, name);
-
-            //Create a second one (flipped) so that its visible from the front & back
-            CreateVisualPlane(boundingPlanes[i].flipped, planeParent, boundsColor, name);
-        }
 
         //Add the bounding planes to each of the cells
         for (int i = 0; i < seeds.Count; i++)
@@ -137,10 +105,6 @@ public class Voronoi : MonoBehaviour
             {
                 cells[i].AddPlane(boundingPlanes[j]);
             }
-
-            // Visually show the cells seeds and planes
-            visualCells.Add(VisualizeCell(cells[i], i));
-            visualCells[i].color.a = planesAlpha;
         }
 
         //Iterate through every seed pair and generate their planes
@@ -153,18 +117,15 @@ public class Voronoi : MonoBehaviour
             }
         }
 
-        //Get the targets and load them into the target specific list
-        for (int i = 0; i < objectives.Count; i++)
+        //Add a random color to each of the cells
+        for (int i = 0; i < cells.Count; i++)
         {
-            Target target = new Target();
-
-            target.id = i;
-            target.obj = objectives[i];
-            target.currentSpace = -1;
-            target.lastPos = new Vec3();
-
-            targets.Add(target);
+            Color color = Random.ColorHSV();
+            color.a = planesAlpha;
+            cellColors.Add(color);
         }
+
+        Visualize();
     }
 
     // Update is called once per frame
@@ -179,14 +140,17 @@ public class Voronoi : MonoBehaviour
 
             if (targets[i].currentSpace >= 0) // Only check if in a valid space
             {
+                bool isStillInside = true;
                 //If we did move, first check if were still in the same space
                 for (int j = 0; j < cells[targets[i].currentSpace].planes.Count; j++)
                 {
-                    if (!cells[targets[i].currentSpace].planes[j].GetSide(targets[i].lastPos)) return;
+                    if (!cells[targets[i].currentSpace].planes[j].GetSide(targets[i].lastPos)) { isStillInside = false; break; }
                 }
+                if (isStillInside) continue;
             }
 
             //If were not in the same space, we check every space
+            bool foundNewSpace = false;
             for (int j = 0; j < cells.Count; j++)
             {
                 bool inside = true;
@@ -198,15 +162,19 @@ public class Voronoi : MonoBehaviour
                 {
                     print("Target changed space!");
                     targets[i].currentSpace = j;
-                    targets[i].obj.GetComponent<MeshRenderer>().material.color = visualCells[j].color;
-                    return;
+                    targets[i].SetColor(cellColors[j]);
+                    foundNewSpace = true;
+                    break;
                 }
             }
 
             // If we arent inside anything, we default to -1
-            print("Target has no space!");
-            targets[i].currentSpace = -1;
-            targets[i].obj.GetComponent<MeshRenderer>().material.color = new Color();
+            if (!foundNewSpace)
+            {
+                print("Target has no space!");
+                targets[i].currentSpace = -1;
+                targets[i].SetColor(new Color(1.0f, 1.0f, 1.0f, 1.0f));
+            }
         }
     }
 
@@ -222,10 +190,6 @@ public class Voronoi : MonoBehaviour
         newPlane.distance = Vector3.Dot(newPlane.normal, ((cell.seed + otherSeed) / 2.0f));
 
         cell.AddPlane(newPlane);
-        Transform parent = visualCells[cellId].parent;
-        Color color = visualCells[cellId].color;
-
-        visualCells[cellId].AddPlane(CreateVisualPlane(newPlane, parent, color));
     }
 
     void Cleanup()
@@ -238,6 +202,21 @@ public class Voronoi : MonoBehaviour
         for (int i = planeParent.childCount - 1; i >= 0; i--)
         {
             Destroy(planeParent.GetChild(i).GameObject());
+        }
+    }
+
+    void LoadTargets()
+    {
+        for (int i = 0; i < objectives.Count; i++)
+        {
+            Target target = new Target();
+
+            target.id = i;
+            target.obj = objectives[i];
+            target.currentSpace = -1;
+            target.lastPos = new Vec3();
+
+            targets.Add(target);
         }
     }
 
@@ -264,51 +243,27 @@ public class Voronoi : MonoBehaviour
         boundingPlanes[5] = new MyPlane(Vec3.Back, maxSize.z / 2);
     }
 
-    VisualVoronoiCell VisualizeCell(VoronoiCell cell, int id)
+    void Visualize()
     {
-        print("visualize: instance " + id);
-        GameObject instance = Instantiate(cellHolder.gameObject, cellParent);
-        instance.name = "Voronoi Cell " + id.ToString();
-
-        VisualVoronoiCell newCell = new VisualVoronoiCell(instance.transform);
-        newCell.SetSeed(CreateVisualSeed(cell.seed, instance.transform, newCell.color));
-
-        /// Start at 6 to avoid re-draw of the bounding box
-        //for (int j = 6; j < cell.planes.Count; j++)
-        //{
-        //    print("plane made ");
-        //    newCell.AddPlane(CreateVisualPlane(cell.planes[j], instance.transform, newCell.color));
-        //}
-
-        return newCell;
+        switch (currentVisualizer)
+        {
+            case Visualizer.Planes:
+                planeVisualizer.Initialize(cells,boundingPlanes);
+                break;
+            case Visualizer.EzySlice:
+                meshVisualizer.Initialize(cells,boundingPlanes);
+                break;
+            default:
+                break;
+        }
     }
 
-    GameObject CreateVisualSeed(Vec3 seed, Transform parent, Color color = new Color())
+    void RandomizeSeeds()
     {
-        print("Created seed " + seed.ToString());
-        GameObject seedObj = Instantiate(seedObject, parent);
-        //if (name == "") seedObj.transform.name = seed.ToString();
-        //else seedObj.transform.name = name;
-        seedObj.transform.name = "Seed " + seed.ToString();
-        seedObj.transform.position = seed;
-
-        seedObj.GetComponent<MeshRenderer>().material.color = color;
-
-        return seedObj;
-    }
-
-    GameObject CreateVisualPlane(MyPlane plane, Transform parent, Color color = new Color(), string name = "")
-    {
-        print("Created plane " + plane.normal.ToString());
-        GameObject planeObj = Instantiate(planeObject, parent);
-        if (name == "") planeObj.transform.name = plane.normal.ToString();
-        else planeObj.transform.name = name;
-        planeObj.transform.position = new Vec3(plane.normal * plane.distance);
-        planeObj.transform.rotation = Quaternion.FromToRotation(Vector3.up, plane.normal);
-
-        planeObj.GetComponent<MeshRenderer>().material.color = color;
-
-        print("Finished plane");
-        return planeObj;
+        seeds.Clear();
+        for (int i = 0; i < seedAmount; i++)
+        {
+            seeds.Add(new Vec3(Random.Range(-maxSize.x / 2, maxSize.x / 2), Random.Range(-maxSize.y / 2, maxSize.y / 2), Random.Range(-maxSize.z / 2, maxSize.z / 2)));
+        }
     }
 }
