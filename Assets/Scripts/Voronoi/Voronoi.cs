@@ -35,7 +35,6 @@ class VoronoiMesh
 {
     public List<Vec3> vertices;
     public List<int> triangles;
-
 }
 
 [System.Serializable]
@@ -53,23 +52,44 @@ public class Target
 //[ExecuteInEditMode]
 public class Voronoi : MonoBehaviour
 {
+    public enum Visualizer { Planes,EzySlice }
+
+    [Header("Visuals")]
+
+    [SerializeField] private Visualizer currentVisualizer;
+
+
+    [Header("References")]
+
     [SerializeField] public Transform cellParent;
     [SerializeField] public GameObject seedObject;
     [SerializeField] public Transform planeParent;
     [SerializeField] public GameObject planeObject;
-
     [SerializeField] public GameObject cellHolder;
 
+
+    [Header("Objectives")]
+
     [SerializeField] public List<GameObject> objectives;
+
+
+    [Header("Bounding box")]
 
     [SerializeField] public Color boundsColor = new Color();
     [Range(0.0f, 1.0f)] public float planesAlpha = 0.5f;
 
 
+    [Header("Attributes")]
+
     [SerializeField] public bool randomize = true;
     [SerializeField] public int seedAmount = 10;
     [SerializeField] public Vec3 maxSize = new Vec3(100, 100, 100);
+    
+
+    [Header("Seeds")]
+
     [SerializeField] public List<Vec3> seeds = new List<Vec3>();
+
 
     private List<Target> targets = new List<Target>();
 
@@ -144,7 +164,6 @@ public class Voronoi : MonoBehaviour
             target.lastPos = new Vec3();
 
             targets.Add(target);
-
         }
     }
 
@@ -195,11 +214,11 @@ public class Voronoi : MonoBehaviour
     {
         MyPlane newPlane = new MyPlane();
 
-        /// Normal is the normalized vector from the current cell's seed & the objective seed
+        // Normal is the normalized vector from the current cell's seed & the objective seed
         Vec3 difference = cell.seed - otherSeed;
         newPlane.normal = difference.normalized;
 
-        /// Distance is the distance from the origin (0.0f,0.0f,0.0f)
+        // Distance is the distance from the origin (0.0f,0.0f,0.0f)
         newPlane.distance = Vector3.Dot(newPlane.normal, ((cell.seed + otherSeed) / 2.0f));
 
         cell.AddPlane(newPlane);
@@ -211,7 +230,7 @@ public class Voronoi : MonoBehaviour
 
     void Cleanup()
     {
-        /// Backwards for loop in case we want to use DestryInmmediate
+        // Backwards for loop in case we want to use DestryInmmediate
         for (int i = cellParent.childCount - 1; i >= 0; i--)
         {
             Destroy(cellParent.GetChild(i).GameObject());
@@ -224,7 +243,7 @@ public class Voronoi : MonoBehaviour
 
     void CreateBoundingBox()
     {
-        /// Bounding planes
+        // Bounding planes
 
         /// bottom
         boundingPlanes[0] = new MyPlane(Vec3.Up, maxSize.y / 2);
