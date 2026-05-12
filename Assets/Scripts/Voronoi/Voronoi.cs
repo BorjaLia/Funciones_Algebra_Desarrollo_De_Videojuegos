@@ -22,7 +22,7 @@ public class Target
         }
         else
         {
-            Debug.Log("No MeshRenderer found!");
+            Debug.LogError("No MeshRenderer found!");
         }
     }
 }
@@ -40,10 +40,7 @@ public class Voronoi : MonoBehaviour
     [Header("References")]
 
     [SerializeField] public Transform cellParent;
-    [SerializeField] public GameObject seedObject;
     [SerializeField] public Transform planeParent;
-    [SerializeField] public GameObject planeObject;
-    [SerializeField] public GameObject cellHolder;
 
 
     [Header("Objectives")]
@@ -67,6 +64,19 @@ public class Voronoi : MonoBehaviour
     [Header("Seeds")]
 
     [SerializeField] public List<Vec3> seeds = new List<Vec3>();
+    
+    
+    [Header("PlaneVisualizer")]
+
+    [SerializeField] public GameObject seedObject;
+    [SerializeField] public GameObject planeObject;
+    [SerializeField] public GameObject cellHolder;
+
+
+    [Header("PlaneVisualizer")]
+    
+    [SerializeField] public Material meshMaterial;
+
 
     public List<Color> cellColors = new List<Color>();
 

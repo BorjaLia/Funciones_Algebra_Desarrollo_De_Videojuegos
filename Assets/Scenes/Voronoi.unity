@@ -144,7 +144,7 @@ Transform:
   m_GameObject: {fileID: 431627519}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -139.12823, y: 56.61256, z: 119.89956}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -179,7 +179,7 @@ Transform:
   m_GameObject: {fileID: 445448831}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 400, y: 66.3, z: 555}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -315,7 +315,7 @@ Transform:
   m_GameObject: {fileID: 1042676620}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 23.707973, y: 11.976299, z: 0.7183447}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -350,12 +350,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 217a4b3ff40decf4cbe9c3e61fd0a1be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentVisualizer: 0
+  currentVisualizer: 1
   cellParent: {fileID: 1042676621}
-  seedObject: {fileID: 8645601812555323211, guid: 7849f863be517254d8553e84d70e4834, type: 3}
   planeParent: {fileID: 770641366}
-  planeObject: {fileID: 691910555427412297, guid: 814030088bcf1214db84d33cb8da6281, type: 3}
-  cellHolder: {fileID: 2388440555713027652, guid: 06f8023347b306c40b163d675e98f94b, type: 3}
   objectives:
   - {fileID: 445448831}
   boundsColor: {r: 0.5031446, g: 0.5031446, b: 0.5031446, a: 1}
@@ -397,6 +394,10 @@ MonoBehaviour:
   - x: 13.348196
     y: 30.390152
     z: -38.787987
+  seedObject: {fileID: 8645601812555323211, guid: 7849f863be517254d8553e84d70e4834, type: 3}
+  planeObject: {fileID: 691910555427412297, guid: 814030088bcf1214db84d33cb8da6281, type: 3}
+  cellHolder: {fileID: 2388440555713027652, guid: 06f8023347b306c40b163d675e98f94b, type: 3}
+  meshMaterial: {fileID: 2100000, guid: cedf1cdb244532f4c9b763a6c8017a9e, type: 2}
   cellColors: []
 --- !u!4 &1313650529
 Transform:

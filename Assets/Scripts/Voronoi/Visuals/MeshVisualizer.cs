@@ -3,9 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using EzySlice;
 
+public class VoronoiMesh
+{
+    public Transform parent;
+
+    private GameObject seed;
+    private GameObject meshObj;
+
+    public void SetSeed(GameObject seed) { this.seed = seed; }
+    public void SetMesh(GameObject meshObj) { this.meshObj = meshObj; }
+
+    public VoronoiMesh(Transform parent) { this.parent = parent; }
+}
+
 public class MeshVisualizer
 {
     private Voronoi manager;
+
+    private List<VoronoiMesh> visualMeshes = new List<VoronoiMesh>();
 
     public MeshVisualizer(Voronoi manager)
     {
@@ -27,66 +42,84 @@ public class MeshVisualizer
     public void VisualizeBoundingBox(MyPlane[] boundingPlanes)
     {
         // Visually show the bounding box
+        CreateMesh(manager.maxSize,manager.planeParent,manager.boundsColor, "Bounding volume");
     }
 
     public void VisualizeCell(VoronoiCell cell, int id)
     {
-        // 1. Crear el material con el color asignado desde el Manager
-        Material cellMaterial = new Material(Shader.Find("Standard"));
-        cellMaterial.color = manager.cellColors[id];
+        Debug.Log("visualize mesh: instance " + id);
 
-        // 2. Instanciar la "arcilla" inicial (nuestra Bounding Box)
-        GameObject clay = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        GameObject instance = Object.Instantiate(manager.cellHolder.gameObject, manager.cellParent);
+        instance.name = "Voronoi Cell " + id.ToString();
 
-        // Destruimos el collider por defecto del cubo para que no interfiera físicamente aún
-        Object.DestroyImmediate(clay.GetComponent<Collider>());
+        VoronoiMesh newMesh = new VoronoiMesh(instance.transform);
+        newMesh.SetSeed(CreateVisualSeed(cell.seed, instance.transform, manager.cellColors[id]));
 
-        clay.transform.position = Vector3.zero;
+        GameObject baseMesh = CreateMesh(manager.maxSize, instance.transform, manager.cellColors[id]);
+        baseMesh.name = "Cell Mesh " + id.ToString();
 
-        // Asumimos que Vec3 tiene casteo implícito a Vector3. Si te da error de casteo, 
-        // cámbialo a: new Vector3(manager.maxSize.x, manager.maxSize.y, manager.maxSize.z)
-        clay.transform.localScale = manager.maxSize;
-        clay.name = "Voronoi Mesh " + id;
-        clay.transform.parent = manager.cellParent;
-        clay.GetComponent<MeshRenderer>().material = cellMaterial;
-
-        // 3. Cortar la arcilla plano por plano
-        // Comenzamos desde el índice 6, porque la arcilla YA ES la Bounding Box.
         for (int j = 6; j < cell.planes.Count; j++)
         {
-            MyPlane p = cell.planes[j];
+            baseMesh = CutMesh(baseMesh, cell.planes[j]);
+        }
+        baseMesh.name = "Cell Mesh " + id.ToString();
 
-            // EzySlice utiliza Vector3 nativo de Unity para hacer el corte
-            Vector3 planePos = p.normal * p.distance;
-            Vector3 planeNormal = p.normal;
+        newMesh.SetMesh(baseMesh);
+        visualMeshes.Add(newMesh);
+    }
 
-            // Realizamos el corte
-            SlicedHull hull = clay.Slice(planePos, planeNormal);
+    private GameObject CreateVisualSeed(Vec3 seed, Transform parent, Color color = new Color())
+    {
+        Debug.Log("Created seed " + seed.ToString());
+        GameObject seedObj = Object.Instantiate(manager.seedObject, parent);
 
-            if (hull != null)
+        seedObj.transform.name = "Seed " + seed.ToString();
+        seedObj.transform.position = seed;
+
+        seedObj.GetComponent<MeshRenderer>().material.color = color;
+
+        return seedObj;
+    }
+
+    private GameObject CreateMesh(Vec3 size, Transform parent, Color color, string name = "")
+    {
+        Debug.Log("Created mesh");
+
+        GameObject meshObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        Object.DestroyImmediate(meshObj.GetComponent<Collider>());
+
+        meshObj.transform.parent = parent;
+        meshObj.transform.localPosition = Vec3.Zero;
+        meshObj.transform.localScale = size;
+        
+        meshObj.GetComponent<MeshRenderer>().material = manager.meshMaterial;
+        meshObj.GetComponent<MeshRenderer>().material.color = color;
+
+        return meshObj;
+    }
+
+    private GameObject CutMesh(GameObject meshObj, MyPlane plane)
+    {
+
+        Vec3 planePos = plane.normal * plane.distance;
+
+        Material currentMaterial = meshObj.GetComponent<MeshRenderer>().sharedMaterial;
+
+        SlicedHull hull = meshObj.Slice(planePos, plane.normal, currentMaterial);
+
+        if (hull != null)
+        {
+            GameObject upper = hull.CreateUpperHull(meshObj, currentMaterial);
+
+            if (upper != null)
             {
-                // La magia matemática: en CalculatePlane hicimos que la normal apunte
-                // desde la semilla 'objetivo' HACIA nuestra semilla actual (cell.seed).
-                // Eso significa que el espacio "adentro" de la celda SIEMPRE es el lado "Upper".
-                GameObject upper = hull.CreateUpperHull(clay, cellMaterial);
-
-                if (upper != null)
-                {
-                    // Configuramos la nueva porción
-                    upper.transform.parent = manager.cellParent;
-                    upper.name = "Voronoi Mesh " + id;
-
-                    // Destruimos la arcilla vieja y los residuos del corte
-                    Object.DestroyImmediate(clay);
-
-                    // La nueva porción se convierte en nuestra arcilla actual para el siguiente corte
-                    clay = upper;
-                }
+                upper.transform.parent = meshObj.transform.parent;
+                
+                Object.DestroyImmediate(meshObj);
+                
+                return upper;
             }
         }
-
-        // Opcional: Si en el futuro necesitas que tus Targets reboten o detecten colisión 
-        // física contra la malla terminada, puedes añadirle un MeshCollider aquí:
-        // clay.AddComponent<MeshCollider>().convex = true;
+        return meshObj;
     }
 }

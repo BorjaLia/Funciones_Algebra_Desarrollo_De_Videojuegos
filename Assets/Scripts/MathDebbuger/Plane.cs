@@ -75,20 +75,19 @@ namespace CustomMath
        public void Flip()
         {
             this.normal = -this.normal;
-            this.distance = -this.distance;
         }
 
-        public void GetDistanceToPoint(Vec3 point)
+        public float GetDistanceToPoint(Vec3 point)
         {
-
+            return Vec3.Dot(this.normal, point) + this.distance;
         }
         public bool GetSide(Vec3 point)
         {
-            return true;
+            return (GetDistanceToPoint(point) > 0.0f);
         }
-        public void SameSide(Vec3 inPt0, Vec3 inPt1)
+        public bool SameSide(Vec3 inPt0, Vec3 inPt1)
         {
-
+            return (GetSide(inPt0) == GetSide(inPt1));
         }
         public void Set3Points(Vec3 a, Vec3 b, Vec3 c)
         {

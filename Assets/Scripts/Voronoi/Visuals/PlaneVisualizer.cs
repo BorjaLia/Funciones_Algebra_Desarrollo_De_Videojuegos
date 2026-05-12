@@ -6,8 +6,6 @@ public class VisualVoronoiCell
 {
     public Transform parent;
 
-    public Color color = Random.ColorHSV();
-
     private GameObject seed;
     private List<GameObject> planes;
 
@@ -15,7 +13,7 @@ public class VisualVoronoiCell
     public void SetPlanes(List<GameObject> planes) { this.planes = planes; }
     public void AddPlane(GameObject plane) { this.planes.Add(plane); }
 
-    public VisualVoronoiCell(Transform parent) { this.parent = parent; this.planes = new List<GameObject>(); this.color = new Color(1.0f, 1.0f, 1.0f, 1.0f); }
+    public VisualVoronoiCell(Transform parent) { this.parent = parent; this.planes = new List<GameObject>(); }
 }
 
 public class PlaneVisualizer
@@ -27,14 +25,14 @@ public class PlaneVisualizer
     public PlaneVisualizer(Voronoi manager)
     {
         this.manager = manager;
-
-        // Unity's plane is 10x10 units by default (we make it the size of our bounding box)
-        manager.planeObject.transform.localScale = (manager.maxSize / 10);
     }
 
     public void Initialize(List<VoronoiCell> cells, MyPlane[] boundingPlanes)
     {
         Debug.Log("Initialized Plane Visualizer");
+
+        // Unity's plane is 10x10 units by default (we make it the size of our bounding box)
+        manager.planeObject.transform.localScale = (manager.maxSize / 10);
 
         VisualizeBoundingBox(boundingPlanes);
 
@@ -70,10 +68,8 @@ public class PlaneVisualizer
         GameObject instance = Object.Instantiate(manager.cellHolder.gameObject, manager.cellParent);
         instance.name = "Voronoi Cell " + id.ToString();
 
-
         VisualVoronoiCell newCell = new VisualVoronoiCell(instance.transform);
-        newCell.SetSeed(CreateVisualSeed(cell.seed, instance.transform, newCell.color));
-        newCell.color = manager.cellColors[id];
+        newCell.SetSeed(CreateVisualSeed(cell.seed, instance.transform, manager.cellColors[id]));
 
         visualCells.Add(newCell);
     }
@@ -81,15 +77,14 @@ public class PlaneVisualizer
     public void AddVisualPlane(MyPlane plane, int cellId)
     {
         Transform parent = visualCells[cellId].parent;
-        Color color = visualCells[cellId].color;
 
-        visualCells[cellId].AddPlane(CreateVisualPlane(plane, parent, color));
+        visualCells[cellId].AddPlane(CreateVisualPlane(plane, parent, manager.cellColors[cellId]));
     }
 
     public Color GetCellColor(int cellId)
     {
         if (cellId >= 0 && cellId < visualCells.Count)
-            return visualCells[cellId].color;
+            return manager.cellColors[cellId];
         return new Color(1.0f, 1.0f, 1.0f, 1.0f); // default white 
     }
 
