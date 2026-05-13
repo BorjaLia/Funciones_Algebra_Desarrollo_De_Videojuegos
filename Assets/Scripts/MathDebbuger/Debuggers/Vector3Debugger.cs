@@ -11,7 +11,7 @@ namespace MathDebbuger
         private static Dictionary<string, CameraInternals.CameraDebugger> debuggers;
         private static bool InitDebugger()
         {
-            renderCamera = Object.FindObjectOfType<Camera>();
+            renderCamera = Object.FindFirstObjectByType<Camera>();
             if (renderCamera)
             {
                 debuggers = new Dictionary<string, CameraInternals.CameraDebugger>();

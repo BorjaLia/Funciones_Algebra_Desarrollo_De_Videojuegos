@@ -132,7 +132,7 @@ namespace CustomMath
         }
         public static float Angle(Vec3 from, Vec3 to)
         {
-            return System.MathF.Acos(Dot(from, to));
+            return System.MathF.Acos(Dot(from.normalized, to.normalized)) * Mathf.Rad2Deg;
         }
         public static Vec3 ClampMagnitude(Vec3 vector, float maxLength)
         {
@@ -144,7 +144,7 @@ namespace CustomMath
         }
         public static Vec3 Cross(Vec3 a, Vec3 b)
         {
-            return new Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.z);
+            return new Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
         }
         public static float Distance(Vec3 a, Vec3 b)
         {
@@ -156,7 +156,7 @@ namespace CustomMath
         }
         public static Vec3 Lerp(Vec3 a, Vec3 b, float t)
         {
-            System.Math.Clamp(t, 0.0f, 1.0f);
+            t = System.Math.Clamp(t, 0.0f, 1.0f);
 
             //return new Vec3(a * (1.0f - t) + b * t); //mi implementacion
             return new Vec3(a + (b - a) * t);
@@ -168,11 +168,13 @@ namespace CustomMath
         }
         public static Vec3 Max(Vec3 a, Vec3 b)
         {
-            return a.magnitude > b.magnitude ? a : b;
+            //return a.magnitude > b.magnitude ? a : b;
+            return new Vec3(Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y), Mathf.Max(a.z, b.z));
         }
         public static Vec3 Min(Vec3 a, Vec3 b)
         {
-            return a.magnitude < b.magnitude ? a : b;
+            //return a.magnitude < b.magnitude ? a : b;
+            return new Vec3(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Min(a.z, b.z));
         }
         public static float SqrMagnitude(Vec3 vector)
         {
@@ -205,9 +207,11 @@ namespace CustomMath
         }
         public void Normalize()
         {
-            this.x /= magnitude;
-            this.y /= magnitude;
-            this.z /= magnitude;
+            float m = magnitude;
+
+            this.x /= m;
+            this.y /= m;
+            this.z /= m;
         }
         #endregion
 
