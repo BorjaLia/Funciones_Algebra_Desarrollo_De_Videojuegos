@@ -107,7 +107,7 @@ public class PlaneVisualizer
         GameObject planeObj = Object.Instantiate(manager.planeObject, parent);
         if (name == "") planeObj.transform.name = plane.normal.ToString();
         else planeObj.transform.name = name;
-        planeObj.transform.position = new Vec3(plane.normal * plane.distance);
+        planeObj.transform.position = new Vec3(-plane.normal * plane.distance);
         planeObj.transform.rotation = Quaternion.FromToRotation(Vector3.up, plane.normal);
 
         planeObj.GetComponent<MeshRenderer>().material.color = color;

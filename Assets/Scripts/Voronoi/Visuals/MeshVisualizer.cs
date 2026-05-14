@@ -100,8 +100,7 @@ public class MeshVisualizer
 
     private GameObject CutMesh(GameObject meshObj, MyPlane plane)
     {
-
-        Vec3 planePos = plane.normal * plane.distance;
+        Vec3 planePos = -plane.normal * plane.distance;
 
         Material currentMaterial = meshObj.GetComponent<MeshRenderer>().sharedMaterial;
 

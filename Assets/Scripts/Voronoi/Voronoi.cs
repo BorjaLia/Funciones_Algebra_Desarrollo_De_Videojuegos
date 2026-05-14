@@ -16,7 +16,7 @@ public class Target
 
     public void SetColor(Color color)
     {
-        if(obj.GetComponent<MeshRenderer>())
+        if (obj.GetComponent<MeshRenderer>())
         {
             obj.GetComponent<MeshRenderer>().material.color = color;
         }
@@ -64,8 +64,8 @@ public class Voronoi : MonoBehaviour
     [Header("Seeds")]
 
     [SerializeField] public List<Vec3> seeds = new List<Vec3>();
-    
-    
+
+
     [Header("PlaneVisualizer")]
 
     [SerializeField] public GameObject seedObject;
@@ -74,7 +74,7 @@ public class Voronoi : MonoBehaviour
 
 
     [Header("PlaneVisualizer")]
-    
+
     [SerializeField] public Material meshMaterial;
 
 
@@ -165,7 +165,7 @@ public class Voronoi : MonoBehaviour
                 bool inside = true;
                 for (int k = 0; k < cells[j].planes.Count; k++)
                 {
-                    if (!cells[j].planes[k].GetSide(targets[i].lastPos)) inside = false;
+                    if (!cells[j].planes[k].GetSide(targets[i].lastPos)) { inside = false; break; }
                 }
                 if (inside)
                 {
@@ -189,14 +189,10 @@ public class Voronoi : MonoBehaviour
 
     void CalculatePlane(VoronoiCell cell, int cellId, Vec3 otherSeed)
     {
-        MyPlane newPlane = new MyPlane();
-
         // Normal is the normalized vector from the current cell's seed & the objective seed
-        Vec3 difference = cell.seed - otherSeed;
-        newPlane.normal = difference.normalized;
-
         // Distance is the distance from the origin (0.0f,0.0f,0.0f)
-        newPlane.distance = Vector3.Dot(newPlane.normal, ((cell.seed + otherSeed) / 2.0f));
+        Vec3 difference = cell.seed - otherSeed;
+        MyPlane newPlane = new MyPlane(difference.normalized, (cell.seed + otherSeed) / 2.0f);
 
         cell.AddPlane(newPlane);
     }
@@ -257,10 +253,10 @@ public class Voronoi : MonoBehaviour
         switch (currentVisualizer)
         {
             case Visualizer.Planes:
-                planeVisualizer.Initialize(cells,boundingPlanes);
+                planeVisualizer.Initialize(cells, boundingPlanes);
                 break;
             case Visualizer.EzySlice:
-                meshVisualizer.Initialize(cells,boundingPlanes);
+                meshVisualizer.Initialize(cells, boundingPlanes);
                 break;
             default:
                 break;
