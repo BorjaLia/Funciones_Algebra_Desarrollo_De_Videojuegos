@@ -120,7 +120,6 @@ namespace CustomMath
             this.distance = -Vec3.Dot(inNormal, inPoint);
         }
 
-
         #endregion
 
         #region Internals

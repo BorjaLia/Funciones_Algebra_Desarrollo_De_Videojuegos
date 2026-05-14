@@ -110,7 +110,7 @@ public class Voronoi : MonoBehaviour
         for (int i = 0; i < seeds.Count; i++)
         {
             cells.Add(new VoronoiCell(seeds[i]));
-            for (int j = 0; j < 5; j++)
+            for (int j = 0; j < 6; j++)
             {
                 cells[i].AddPlane(boundingPlanes[j]);
             }
@@ -143,7 +143,7 @@ public class Voronoi : MonoBehaviour
         for (int i = 0; i < targets.Count; i++)
         {
             // Only check if we moved
-            if (targets[i].lastPos == targets[i].obj.transform.position) return;
+            if (targets[i].lastPos == targets[i].obj.transform.position) continue;
 
             targets[i].lastPos = new Vec3(targets[i].obj.transform.position);
 

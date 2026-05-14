@@ -356,7 +356,7 @@ MonoBehaviour:
   objectives:
   - {fileID: 445448831}
   boundsColor: {r: 0.5031446, g: 0.5031446, b: 0.5031446, a: 1}
-  planesAlpha: 1
+  planesAlpha: 0.05
   randomize: 1
   seedAmount: 10
   maxSize:
