@@ -49,6 +49,7 @@ namespace BSP
 
             ProcessFrustumRayGrid();
             visualizer.DrawPortalOutlines(builder.AllPortals);
+
             ApplyFrustumCulling();
 
             if (visibleRooms.Count != lastVisibleRoomsCount)
@@ -158,17 +159,39 @@ namespace BSP
                         {
                             foreach (Portal p in w.portals)
                             {
-                                float minX = Mathf.Min(p.corners[0].x, p.corners[1].x);
-                                float maxX = Mathf.Max(p.corners[0].x, p.corners[1].x);
-                                float minY = Mathf.Min(p.corners[0].y, p.corners[1].y);
-                                float maxY = Mathf.Max(p.corners[0].y, p.corners[1].y);
+                                Vec3 normal = w.plane.normal;
+                                Vec3 worldUp = new Vec3(0, 1, 0);
 
-                                if (start.x >= minX && start.x <= maxX &&
-                                    start.y >= minY && start.y <= maxY)
+                                if (Mathf.Abs(normal.y) > 0.99f)
+                                {
+                                    worldUp = new Vec3(1, 0, 0);
+                                }
+
+                                Vec3 rightVec = Vec3.Cross(worldUp, normal).normalized;
+                                Vec3 upPlaneVec = Vec3.Cross(normal, rightVec).normalized;
+
+                                float localStartX = Vec3.Dot(start, rightVec);
+                                float localStartY = Vec3.Dot(start, upPlaneVec);
+
+                                float c0X = Vec3.Dot(p.corners[0], rightVec);
+                                float c0Y = Vec3.Dot(p.corners[0], upPlaneVec);
+
+                                float c1X = Vec3.Dot(p.corners[1], rightVec);
+                                float c1Y = Vec3.Dot(p.corners[1], upPlaneVec);
+
+                                float minX = Mathf.Min(c0X, c1X);
+                                float maxX = Mathf.Max(c0X, c1X);
+                                float minY = Mathf.Min(c0Y, c1Y);
+                                float maxY = Mathf.Max(c0Y, c1Y);
+
+                                if (localStartX >= minX - 0.05f && localStartX <= maxX + 0.05f &&
+                                    localStartY >= minY - 0.05f && localStartY <= maxY + 0.05f)
                                 {
                                     passedPortal = true;
                                     hitPortal = true;
+
                                     if (p.nextRoom != null) visibleRooms.Add(p.nextRoom);
+
                                     break;
                                 }
                             }

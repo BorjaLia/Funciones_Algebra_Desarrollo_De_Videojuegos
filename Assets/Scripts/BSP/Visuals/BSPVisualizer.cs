@@ -121,10 +121,24 @@ namespace BSP
                 Vec3 c1 = p.corners[0]; // Min
                 Vec3 c2 = p.corners[1]; // Max
 
-                Vec3 bottomLeft = new Vec3(c1.x, c1.y, c1.z);
-                Vec3 bottomRight = new Vec3(c2.x, c1.y, c1.z);
-                Vec3 topLeft = new Vec3(c1.x, c2.y, c2.z);
-                Vec3 topRight = new Vec3(c2.x, c2.y, c2.z);
+                bool isSideWall = Mathf.Abs(c1.x - c2.x) < 0.01f;
+
+                Vec3 bottomLeft, bottomRight, topLeft, topRight;
+
+                if (isSideWall)
+                {
+                    bottomLeft = new Vec3(c1.x, c1.y, c1.z);
+                    bottomRight = new Vec3(c1.x, c1.y, c2.z);
+                    topLeft = new Vec3(c1.x, c2.y, c1.z);
+                    topRight = new Vec3(c1.x, c2.y, c2.z);
+                }
+                else
+                {
+                    bottomLeft = new Vec3(c1.x, c1.y, c1.z);
+                    bottomRight = new Vec3(c2.x, c1.y, c1.z);
+                    topLeft = new Vec3(c1.x, c2.y, c1.z);
+                    topRight = new Vec3(c2.x, c2.y, c1.z);
+                }
 
                 Debug.DrawLine(bottomLeft, bottomRight, Color.yellow);
                 Debug.DrawLine(bottomRight, topRight, Color.yellow);
