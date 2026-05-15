@@ -30,7 +30,7 @@ namespace BSP
     {
         public Vec3[] corners = new Vec3[2];
 
-        // TODO: room reference
+        public BSPRoom nextRoom;
     }
 
     public class Wall

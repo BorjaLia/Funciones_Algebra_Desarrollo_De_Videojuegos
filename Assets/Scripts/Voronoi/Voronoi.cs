@@ -90,6 +90,8 @@ public class Voronoi : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        //Dealunay
+
         Cleanup();
 
         planeVisualizer = new PlaneVisualizer(this);
