@@ -183,7 +183,7 @@ namespace CustomMath
         public static Vec3 Project(Vec3 vector, Vec3 onNormal)
         {
             Vec3 normalized = onNormal.normalized;
-            float mag = Dot(vector, normalized); // magnitud de la proyeccion
+            float mag = Dot(vector, normalized);
             return (normalized * mag);
         }
         public static Vec3 Reflect(Vec3 inDirection, Vec3 inNormal)

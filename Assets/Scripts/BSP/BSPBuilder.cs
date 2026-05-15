@@ -165,6 +165,9 @@ namespace BSP
             p.corners[0] = min;
             p.corners[1] = max;
             p.nextRoom = nextRoom;
+
+            p.SetupLocalSpace(wall.plane.normal);
+
             wall.AddPortal(p);
             AllPortals.Add(p);
         }
