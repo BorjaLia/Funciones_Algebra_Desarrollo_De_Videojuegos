@@ -136,6 +136,7 @@ namespace BSP
 
         private bool FindRoomsInSegment(Vec3 start, Vec3 end, ref Vec3 outBlockPoint, ref bool hitPortal)
         {
+            // If both the start and end are in the same room, early exit
             BSPRoom startRoom = bspRoot.GetRoom(start);
             BSPRoom endRoom = bspRoot.GetRoom(end);
 
@@ -145,6 +146,7 @@ namespace BSP
                 return true;
             }
 
+            // If the ray is very short, we check if we hit a portal or a wall
             if (Vec3.Distance(start, end) < 0.01f)
             {
                 if (startRoom != null) visibleRooms.Add(startRoom);
@@ -152,9 +154,11 @@ namespace BSP
 
                 if (startRoom != null)
                 {
+                    //we check if were hitting a wall
                     foreach (Wall w in startRoom.walls)
                     {
                         float distToPlane = Mathf.Abs(Vec3.Dot(w.plane.normal, start) + w.plane.distance);
+                        // if we are hitting a wall, we check if were hitting a portal
                         if (distToPlane < 0.05f)
                         {
                             foreach (Portal p in w.portals)
@@ -184,6 +188,7 @@ namespace BSP
                                 float minY = Mathf.Min(c0Y, c1Y);
                                 float maxY = Mathf.Max(c0Y, c1Y);
 
+                                // If the ray hits inside the bounds of the portal, we check passedPortal
                                 if (localStartX >= minX - 0.05f && localStartX <= maxX + 0.05f &&
                                     localStartY >= minY - 0.05f && localStartY <= maxY + 0.05f)
                                 {
@@ -196,6 +201,7 @@ namespace BSP
                                 }
                             }
                         }
+                        // If we did hit a portal, we stop checking
                         if (passedPortal) break;
                     }
                 }
@@ -204,9 +210,11 @@ namespace BSP
                 return passedPortal;
             }
 
+            // Find the room in the mid point
             Vec3 midPoint = Vec3.Lerp(start, end, 0.5f);
             bool canContinue = FindRoomsInSegment(start, midPoint, ref outBlockPoint, ref hitPortal);
 
+            // If start to midPoint is true (they connect) we check the following half
             if (canContinue)
             {
                 return FindRoomsInSegment(midPoint, end, ref outBlockPoint, ref hitPortal);
