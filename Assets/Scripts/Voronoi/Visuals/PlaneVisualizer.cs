@@ -103,7 +103,7 @@ public class PlaneVisualizer
 
     private GameObject CreateVisualPlane(MyPlane plane, Transform parent, Color color = new Color(), string name = "")
     {
-        Debug.Log("Created plane " + plane.normal.ToString());
+        //Debug.Log("Created plane " + plane.normal.ToString());
         GameObject planeObj = Object.Instantiate(manager.planeObject, parent);
         if (name == "") planeObj.transform.name = plane.normal.ToString();
         else planeObj.transform.name = name;
